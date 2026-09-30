@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚠ SECURITY TERMINAL</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020403;color:#00ff66;font-family:Consolas,"Courier New",monospace}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,255,80,.035) 0 1px,transparent 1px 4px);z-index:8}
+#matrix{position:fixed;inset:0;opacity:.16}
+#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle,transparent 45%,rgba(0,0,0,.8));z-index:7}
+#terminal{position:relative;height:100%;padding:22px 28px;z-index:3;text-shadow:0 0 8px #00ff66}
+.header{display:flex;justify-content:space-between;border-bottom:1px solid #00ff66;padding-bottom:10px;margin-bottom:14px}
+.logo{font-size:20px;font-weight:bold}.status{color:#ffcc00}
+#output{height:62vh;overflow:hidden;font-size:15px;line-height:1.55}
+.line{white-space:pre-wrap}.dim{opacity:.65}.warn{color:#ffcc00;text-shadow:0 0 8px #ffcc00}.danger{color:#ff3333;text-shadow:0 0 12px red}.cyan{color:#00eaff}
+#barbox{height:25px;border:1px solid #00ff66;padding:3px;margin-top:10px;box-shadow:0 0 12px #00ff6644}
+#bar{height:100%;width:0;background:#00ff66;box-shadow:0 0 15px #00ff66;transition:width .12s}
+#percent{text-align:center;margin-top:6px}
+#count{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font-size:130px;color:red;text-shadow:0 0 35px red;z-index:12}
+#alert{position:fixed;inset:0;display:none;z-index:11;align-items:center;justify-content:center;text-align:center;background:rgba(90,0,0,.88)}
+.alertBox{border:3px solid red;padding:35px 60px;box-shadow:0 0 50px red;animation:pulse .35s infinite alternate}
+.alertBox h1{font-size:50px;margin:0 0 15px}.alertBox p{font-size:20px}
+#reveal{position:fixed;inset:0;display:none;z-index:20;align-items:center;justify-content:center;text-align:center;background:#030504}
+.revealBox{animation:pop 1s ease-out}
+.revealBox h1{font-family:Arial,sans-serif;font-size:76px;color:#00ff66;text-shadow:0 0 30px #00ff66;margin:0}
+.revealBox p{font:24px Arial;color:white}
+.glitch{animation:glitch .12s infinite}
+@keyframes pulse{to{transform:scale(1.02);filter:brightness(1.5)}}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes glitch{0%{transform:translate(0)}25%{transform:translate(3px,-2px)}50%{transform:translate(-3px,2px)}75%{transform:translate(2px,1px)}100%{transform:translate(0)}}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div id="terminal">
+  <div class="header">
+    <div class="logo">◉ NIGHTWATCH SECURITY TERMINAL</div>
+    <div class="status">● CONNECTION: ACTIVE</div>
+  </div>
+  <div id="output"></div>
+  <div id="barbox"><div id="bar"></div></div>
+  <div id="percent">INITIALIZING... 0%</div>
+</div>
+
+<div id="count"></div>
+
+<div id="alert">
+  <div class="alertBox glitch">
+    <h1>⚠ CRITICAL ALERT ⚠</h1>
+    <p>UNAUTHORIZED ACCESS DETECTED</p>
+    <p>EMERGENCY SECURITY PROTOCOL ACTIVATED</p>
+  </div>
+</div>
+
+<div id="reveal">
+  <div class="revealBox">
+    <h1>😂 GOT YOU! 😂</h1>
+    <p>This was a harmless coding prank.</p>
+    <p>Nothing was accessed, changed, deleted, or downloaded.</p>
+    <p>😎 Your friend survived the fake security apocalypse!</p>
+  </div>
+</div>
+
+<script>
+// Animated background particles
+const canvas=document.getElementById("matrix"),ctx=canvas.getContext("2d");
+let w,h,cols,drops;
+function resize(){
+  w=canvas.width=innerWidth; h=canvas.height=innerHeight;
+  cols=Math.floor(w/18); drops=Array(cols).fill(0).map(()=>Math.random()*h);
+}
+resize(); addEventListener("resize",resize);
+function matrix(){
+  ctx.fillStyle="rgba(0,0,0,.08)";ctx.fillRect(0,0,w,h);
+  ctx.fillStyle="#00ff66";ctx.font="14px monospace";
+  drops.forEach((y,i)=>{
+    const c=String.fromCharCode(0x30A0+Math.random()*96);
+    ctx.fillText(c,i*18,y);
+    drops[i]=y>h&&Math.random()>.97?0:y+18;
+  });
+  requestAnimationFrame(matrix);
+}
+matrix();
+
+const out=document.getElementById("output");
+const bar=document.getElementById("bar");
+const pct=document.getElementById("percent");
+const count=document.getElementById("count");
+const alertBox=document.getElementById("alert");
+const reveal=document.getElementById("reveal");
+
+const lines=[
+"Boot sequence started...",
+"Loading visual security modules...",
+"Checking encrypted session...",
+"Mapping simulated network nodes...",
+"Analyzing temporary memory...",
+"Scanning browser cache...",
+"Scanning simulated system directories...",
+"Checking access permissions...",
+"Inspecting running processes...",
+"Comparing security signatures...",
+"WARNING: irregular activity detected!",
+"Rechecking security signatures...",
+"Attempting emergency verification...",
+"Verification response: FAILED",
+"Starting simulated containment protocol...",
+"Generating incident report...",
+"Lockdown sequence prepared..."
+];
+
+function addLine(text, cls=""){
+  const d=document.createElement("div");d.className="line "+cls;d.textContent="> "+text;
+  out.appendChild(d);
+  while(out.children.length>24)out.removeChild(out.firstChild);
+}
+function typeLine(text,cls,done){
+  const d=document.createElement("div");d.className="line "+cls;out.appendChild(d);
+  let i=0;
+  const t=setInterval(()=>{
+    d.textContent="> "+text.slice(0,++i);
+    if(i>=text.length){clearInterval(t);done();}
+  },14);
+}
+
+let n=0;
+function sequence(){
+  if(n<lines.length){
+    const x=lines[n];
+    let cls=x.includes("WARNING")?"warn":x.includes("FAILED")?"danger":x.includes("emergency")||x.includes("containment")?"cyan":"";
+    typeLine(x,cls,()=>{n++;setTimeout(sequence,260)});
+  }else scan();
+}
+
+function scan(){
+  let p=0;
+  const timer=setInterval(()=>{
+    p+=Math.floor(Math.random()*4)+1;
+    if(p>100)p=100;
+    bar.style.width=p+"%";
+    pct.textContent="SECURITY SCAN: "+p+"%";
+    if(p>=100){
+      clearInterval(timer);
+      addLine("SCAN COMPLETE — SIMULATION ESCALATION TRIGGERED","danger");
+      setTimeout(countdown,1000);
+    }
+  },90);
+}
+
+function countdown(){
+  let n=9; count.style.display="flex"; count.textContent=n;
+  const t=setInterval(()=>{
+    n--;
+    if(n<=0){
+      clearInterval(t); count.style.display="none";
+      alertBox.style.display="flex";
+      document.body.style.animation="none";
+      setTimeout(()=>{
+        alertBox.style.display="none";
+        reveal.style.display="flex";
+      },4500);
+    }else count.textContent=n;
+  },800);
+}
+setTimeout(sequence,800);
+</script>
+</body>
+</html>
